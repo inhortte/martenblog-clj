@@ -9,7 +9,8 @@
 (def ^:private lepton (atom {:entry-count 40
                              :topic {:topics []
                                      :filter ""
-                                     :filtered-topics []}}))
+                                     :filtered-topics []
+                                     :current #{}}}))
 
 ;; ---------------------
 ;; logic
@@ -56,15 +57,32 @@
 ;; view
 ;; ---------------------
 
-(defn- page-links []
+(defn- show-page-links []
   (let [page-count (+ (quot (:entry-count @lepton) entries-per-page)
                       (if (zero? (rem (:entry-count @lepton) entries-per-page)) 0 1))
         the-links (for [p (range 1 (inc page-count))] [:a {:href (str "/entries/page/" p)
                                                            :key p} p])]
     [:div the-links]))
 
+(defn- show-current-topic [topic]
+  (letfn [(remove-current-topic! []
+            (let [current-topic-ids (:current (:topic @lepton))]
+              (js/console.log (str "current-topic-ids " current-topic-ids))
+              (swap! lepton assoc-in [:topic :current]
+                     (set (remove #(= (Math/floor (:id topic)) (Math/floor %))
+                                  current-topic-ids)))))]
+    [:a {:href "#" :key (:id topic)
+         :on-click remove-current-topic!} (:topic topic)]))
+
+(defn- show-current-topics []
+  (let [current-topic-ids (:current (:topic @lepton))
+        current-topics (filter #(get current-topic-ids (:id %)) (:topics (:topic @lepton)))]
+    [:div#current-topics
+     "Current:"
+     (for [t current-topics] (show-current-topic t))]))
+
 ;; take tf-change! out of this
-(defn- topic-filter []
+(defn- show-topic-filter []
   (letfn [(tf-change! [e]
             (swap! lepton assoc-in [:topic :filter] (-> e .-target .-value))
             (let [all-topics (:topics (:topic @lepton))
@@ -79,13 +97,19 @@
                :placeholder "Kill Christián"
                :value (:filter (:topic @lepton))}])))
 
-(defn- topic-links []
-  (let [the-links (for [t (:filtered-topics (:topic @lepton))]
-                    [:li {:key (:id t)}
-                     [:a {:href (str "/entries/topic-add/" (:id t))} (:topic t)]])]
+(defn- show-topic-link [topic]
+  (letfn [(add-current-topic! []
+            (let [current-topics (:current (:topic @lepton))]
+              (swap! lepton assoc-in [:topic :current] (conj current-topics (:id topic)))))]
+    [:li {:key (:id topic)}
+     [:a {:href "#"
+          :on-click add-current-topic!} (:topic topic)]]))
+
+(defn- show-topic-links []
+  (let [the-links (for [t (:filtered-topics (:topic @lepton))] (show-topic-link t))]
     [:div#sidebar-wrapper
      [:ul.sidebar-nav
-      [:li.sidebar-brand (topic-filter)]
+      [:li.sidebar-brand (show-topic-filter)]
       the-links]]))
 
 (defn buttock-page []
@@ -96,8 +120,9 @@
        [:div#header
         [:img {:src "img/gretel.jpg"}]]
        [:div.content
-        (page-links)
-        (topic-links)
+        (show-page-links)
+        (show-current-topics)
+        (show-topic-links)
         [:div#entries
          "entries!"
          [:div [:a {:href "/"} "go home"]]]]])))
