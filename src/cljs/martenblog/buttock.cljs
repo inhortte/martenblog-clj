@@ -48,7 +48,7 @@
                               (do
                                 (js/console.log (str "Death to you, VOLE: " (:status-text res))))))}))
 
-(defn buttock-init []
+(defn- buttock-init []
   (get-entry-count)
   (get-topics))
 
@@ -63,12 +63,6 @@
                                                            :key p} p])]
     [:div the-links]))
 
-(defn- topic-links []
-  (let [the-links (for [t (:filtered-topics (:topic @lepton))]
-                    [:div {:key (:id t)}
-                     [:a {:href (str "/entries/topic-add/" (:id t))} (:topic t)]])]
-    [:div the-links]))
-
 ;; take tf-change! out of this
 (defn- topic-filter []
   (letfn [(tf-change! [e]
@@ -78,22 +72,32 @@
               (swap! lepton assoc-in [:topic :filtered-topics]
                      (if (not (zero? (count filterer)))
                        (filter #(re-find (re-pattern (str "(?i)" filterer)) (:topic %)) all-topics)
-                       all-topics))
-              (js/console.log (count (:filtered-topics (:topic @lepton))))))]
+                       all-topics))))]
     (do
+      [:input {:type "text"
+               :on-change tf-change!
+               :placeholder "Kill Christián"
+               :value (:filter (:topic @lepton))}])))
 
-      [:div
-       "Kill Christián:"
-       [:input {:type "text"
-                :on-change tf-change!
-                :value (:filter (:topic @lepton))}]])))
+(defn- topic-links []
+  (let [the-links (for [t (:filtered-topics (:topic @lepton))]
+                    [:li {:key (:id t)}
+                     [:a {:href (str "/entries/topic-add/" (:id t))} (:topic t)]])]
+    [:div#sidebar-wrapper
+     [:ul.sidebar-nav
+      [:li.sidebar-brand (topic-filter)]
+      the-links]]))
 
 (defn buttock-page []
   (do
     (buttock-init)
     (fn []
-      [:div [:h2 "There is a mustelid in the closet"]
-       (page-links)
-       (topic-filter)
-       (topic-links)
-       [:div [:a {:href "/"} "go home"]]])))
+      [:div#blog
+       [:div#header
+        [:img {:src "img/gretel.jpg"}]]
+       [:div.content
+        (page-links)
+        (topic-links)
+        [:div#entries
+         "entries!"
+         [:div [:a {:href "/"} "go home"]]]]])))

@@ -20,7 +20,7 @@
 
 (def loading-page
   (html
-   [:html
+   [:html {:lang "en"}
     [:head
      [:meta {:charset "utf-8"}]
      [:meta {:name "viewport"
@@ -28,6 +28,10 @@
      (include-css (if (env :dev) "css/site.css" "css/site.min.css"))]
     [:body
      mount-target
+     (include-js "css/ss/js/jquery.js")
+     (include-css "css/ss/css/bootstrap.min.css")
+     (include-js "css/ss/js/bootstrap.min.js")
+     (include-css "css/ss/css/simple-sidebar.css")
      (include-js "js/app.js")]]))
 
 
