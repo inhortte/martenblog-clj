@@ -18,5 +18,7 @@
   []
   (let [db (mg/get-db @conn db-name)]
     (->> (mc/find (mg/get-db @conn db-name) "topic" {} {:topic 1 :entry_ids 1})
-         (map #(hash-map :topic (get % "topic") :entry-count (count (get % "entry_ids"))))
+         (map #(hash-map :id (get % "_id")
+                         :topic (get % "topic")
+                         :entry-count (count (get % "entry_ids"))))
          (sort-by :entry-count >))))
