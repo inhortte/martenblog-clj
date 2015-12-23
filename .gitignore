@@ -13,3 +13,5 @@ pom.xml.asc
 /.repl
 *.log
 /.env
+startbootstrap*
+ss
