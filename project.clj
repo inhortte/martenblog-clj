@@ -22,7 +22,7 @@
                  [venantius/accountant "0.1.5"
                   :exclusions [org.clojure/tools.reader]]
                  [com.novemberain/monger "3.0.0-rc2"]
-                 ]
+                 [cljs-ajax "0.5.1"]]
 
   :plugins [[lein-environ "1.0.1"]
             [lein-cljsbuild "1.1.1"]

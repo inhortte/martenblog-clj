@@ -32,9 +32,11 @@
 
 
 (defroutes routes
-  (GET "/" [] loading-page)
-  (GET "/about" [] loading-page)
+  (GET "/*" [] loading-page)
   (POST "/paginas" []  (-> {:entryCount (entry-count)}
+                           (response/response)
+                           (response/content-type "application/json")))
+  (POST "/topics" []  (-> {:topics (topics)}
                            (response/response)
                            (response/content-type "application/json")))
 
