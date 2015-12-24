@@ -31,7 +31,7 @@
      (include-js "css/ss/js/jquery.js")
      (include-css "css/ss/css/bootstrap.min.css")
      (include-js "css/ss/js/bootstrap.min.js")
-     (include-css "css/ss/css/simple-sidebar.css")
+     (include-css "css/simple-sidebar.css")
      (include-js "js/app.js")]]))
 
 

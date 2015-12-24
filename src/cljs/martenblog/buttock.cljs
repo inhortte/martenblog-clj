@@ -2,7 +2,7 @@
   (:require [reagent.core :as reagent :refer [atom]]
             [ajax.core :refer [ajax-request url-request-format json-response-format]]))
 
-(declare topic-filter)
+(declare topic-filter show-current-topics)
 
 (def entries-per-page 11)
 
@@ -71,14 +71,15 @@
               (swap! lepton assoc-in [:topic :current]
                      (set (remove #(= (Math/floor (:id topic)) (Math/floor %))
                                   current-topic-ids)))))]
-    [:a {:href "#" :key (:id topic)
-         :on-click remove-current-topic!} (:topic topic)]))
+    [:span {:key (:id topic)}
+     [:a {:href "#"
+          :on-click remove-current-topic!} (:topic topic)] " "]))
 
 (defn- show-current-topics []
   (let [current-topic-ids (:current (:topic @lepton))
         current-topics (filter #(get current-topic-ids (:id %)) (:topics (:topic @lepton)))]
     [:div#current-topics
-     "Current:"
+     "Current: "
      (for [t current-topics] (show-current-topic t))]))
 
 ;; take tf-change! out of this
@@ -108,6 +109,7 @@
 (defn- show-topic-links []
   (let [the-links (for [t (:filtered-topics (:topic @lepton))] (show-topic-link t))]
     [:div#sidebar-wrapper
+     (show-current-topics)
      [:ul.sidebar-nav
       [:li.sidebar-brand (show-topic-filter)]
       the-links]]))
@@ -121,7 +123,6 @@
         [:img {:src "img/gretel.jpg"}]]
        [:div.content
         (show-page-links)
-        (show-current-topics)
         (show-topic-links)
         [:div#entries
          "entries!"
