@@ -4,11 +4,12 @@
             [ajax.core :refer [ajax-request url-request-format json-response-format]]
             [clojure.string :refer [join]]))
 
-(declare topic-filter show-current-topics)
+(declare topic-filter show-current-topics get-entries)
 
 (def entries-per-page 11)
 
 (def ^:private lepton (atom {:entry-count 40
+                             :entries []
                              :topic {:topics []
                                      :filter ""
                                      :filtered-topics []
@@ -51,9 +52,24 @@
                               (do
                                 (js/console.log (str "Death to you, VOLE: " (:status-text res))))))}))
 
+(defn get-entries []
+  (let [uri (str "/entries"
+                 (if (empty? current-topics) "" (str "?t=" (join "," (:current (:topic @lepton)))))
+                 "?p=" (session/get :page-number))]
+    (console.log (str "entries uri: " uri))
+    (ajax-request {:uri uri
+                   :method :post
+                   :format (url-request-format)
+                   :response-format (json-response-format {:keywords? true})
+                   :handler (fn [[ok res]]
+                              (if ok
+                                (swap! lepton assoc :entries (:entries res))
+                                (js/console.log (str "Death to all the entries, VOLE: " (:status-text res)))))})))
+
 (defn- buttock-init []
   (get-entry-count)
-  (get-topics))
+  (get-topics)
+  (get-entries))
 
 ;; ---------------------
 ;; view
@@ -121,6 +137,16 @@
       [:li.sidebar-brand (show-topic-filter)]
       the-links]]))
 
+(defn- show-entry [entry]
+  [:div.entry {:key (:_id entry)}
+   [:div.date (:created_at entry)]
+   [:div.subject (:subject entry)]])
+
+(defn- show-entries []
+  (let [the-entries (for [e (:entries @lepton)] (show-entry e))]
+    [:div#entries
+     the-entries]))
+
 (defn buttock-page []
   (do
     (buttock-init)
@@ -131,6 +157,4 @@
        [:div.content
         (show-page-links)
         (show-topic-links)
-        [:div#entries
-         "entries!"
-         [:div [:a {:href "/"} "go home"]]]]])))
+        (show-entries)]])))

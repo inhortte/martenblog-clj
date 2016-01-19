@@ -43,7 +43,11 @@
   (POST "/topics" []  (-> {:topics (topics)}
                            (response/response)
                            (response/content-type "application/json")))
-
+  (POST "/entries" [t p]
+        (do (println (str "############ ENTRIES! t:" t "  p:" p))
+            (-> {:entries (entries t p)}
+                (response/response)
+                (response/content-type "application/json"))))
   (resources "/")
   (not-found "Not Found"))
 

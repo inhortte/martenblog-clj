@@ -3,7 +3,7 @@
               [accountant.core :as accountant]
               [reagent.core :as reagent]
               [reagent.session :as session]
-              [martenblog.buttock :refer [buttock-page]]))
+              [martenblog.buttock :refer [buttock-page get-entries]]))
 
 ;; -------------------------
 ;; Views
@@ -30,10 +30,12 @@
 (secretary/defroute "/:pagina" [pagina]
   (js/console.log (str "pagina: " pagina))
   (session/put! :page-number (js/parseInt pagina))
+  (get-entries)
   (session/put! :current-page #'buttock-page))
 
 (secretary/defroute "/" []
   (session/put! :page-number 1)
+  (get-entries)
   (session/put! :current-page #'buttock-page))
 
 ;; -------------------------
