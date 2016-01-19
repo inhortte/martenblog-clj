@@ -12,6 +12,7 @@ pom.xml.asc
 /out
 /.repl
 *.log
+*.swp
 /.env
 startbootstrap*
 ss

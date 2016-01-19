@@ -1,6 +1,8 @@
 (ns martenblog.buttock
   (:require [reagent.core :as reagent :refer [atom]]
-            [ajax.core :refer [ajax-request url-request-format json-response-format]]))
+            [reagent.session :as session]
+            [ajax.core :refer [ajax-request url-request-format json-response-format]]
+            [clojure.string :refer [join]]))
 
 (declare topic-filter show-current-topics)
 
@@ -60,9 +62,14 @@
 (defn- show-page-links []
   (let [page-count (+ (quot (:entry-count @lepton) entries-per-page)
                       (if (zero? (rem (:entry-count @lepton) entries-per-page)) 0 1))
-        the-links (for [p (range 1 (inc page-count))] [:a {:href (str "/entries/page/" p)
-                                                           :key p} p])]
-    [:div the-links]))
+        page-number (session/get :page-number)
+        the-links (for [p (range 1 (inc page-count))] 
+                    (if (= p page-number)
+                      [:span {:key p} p] 
+                      [:a {:href (str "/" p)
+                           :key p} p]))
+        ]
+    [:div#page-links (doall (drop 1 (interleave (iterate (fn [_] [:span {:key (+ 4096 (rand-int 61440))} " | "]) 0) the-links)))]))
 
 (defn- show-current-topic [topic]
   (letfn [(remove-current-topic! []

@@ -1,5 +1,5 @@
 (ns martenblog.core
-    (:require [secretary.core :as secretary :include-macros true]
+    (:require [secretary.core :as secretary :refer-macros [defroute]]
               [accountant.core :as accountant]
               [reagent.core :as reagent]
               [reagent.session :as session]
@@ -22,13 +22,18 @@
 ;; -------------------------
 ;; Routes
 
+(secretary/defroute "/:y/:m/:d" [y m d]
+  (js/console.log (str y "-" m "-" d))
+  (session/put! :page-number 1)
+  (session/put! :current-page #'buttock-page))
+
+(secretary/defroute "/:pagina" [pagina]
+  (js/console.log (str "pagina: " pagina))
+  (session/put! :page-number (js/parseInt pagina))
+  (session/put! :current-page #'buttock-page))
+
 (secretary/defroute "/" []
-  (session/put! :current-page #'home-page))
-
-(secretary/defroute "/about" []
-  (session/put! :current-page #'about-page))
-
-(secretary/defroute "/buttock" []
+  (session/put! :page-number 1)
   (session/put! :current-page #'buttock-page))
 
 ;; -------------------------
